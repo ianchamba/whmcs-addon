@@ -342,6 +342,31 @@
                         </div>
                     </div>
                     {* /gnfe_email_nfe_config *}
+                    {* auto_refresh_created_status *}
+                    <div class="form-group">
+                        <label class="control-label col-sm-4"
+                               for="{$moduleFields.auto_refresh_created_status.id}">{$moduleFields.auto_refresh_created_status.label}
+                            :</label>
+                        <div class="col-sm-8">
+                            <div class="checkbox">
+                                <label>
+                                    <input
+                                            type="{$moduleFields.auto_refresh_created_status.type}"
+                                            name="{$moduleFields.auto_refresh_created_status.name}"
+                                            id="{$moduleFields.auto_refresh_created_status.id}"
+                                            aria-describedby="{$moduleFields.auto_refresh_created_status.id}HelpBlock"
+                                            {if $moduleFields.auto_refresh_created_status.required}required{/if}
+                                            {if $moduleFields.auto_refresh_created_status.disabled}disabled{/if}
+                                            {if $auto_refresh_created_status == 'on'}checked{/if}
+                                    >
+                                    {$moduleFields.auto_refresh_created_status.label}
+                                </label>
+                                <span class="help-block"
+                                      id="{$moduleFields.auto_refresh_created_status.id}HelpBlock">{$moduleFields.auto_refresh_created_status.description}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {* /auto_refresh_created_status *}
                     {* descCustom *}
                     <div class="form-group">
                         <label class="control-label col-sm-4"

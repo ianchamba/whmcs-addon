@@ -77,5 +77,62 @@ class AfterCronJob
             }
 
         }
+
+        if ($storage->get('auto_refresh_created_status') === 'on') {
+            $this->refreshCreatedInvoicesStatus();
+        }
+    }
+
+    private function refreshCreatedInvoicesStatus()
+    {
+        $serviceInvoicesTable = $this->serviceInvoicesRepo->tableName();
+
+        $createdInvoices = Capsule::table($serviceInvoicesTable)
+            ->where('status', '=', 'Created')
+            ->whereNotNull('nfe_id')
+            ->where('nfe_id', '!=', 'waiting')
+            ->orderBy('updated_at', 'asc')
+            ->limit(5)
+            ->get();
+
+        $totalCreated = count($createdInvoices);
+
+        logModuleCall(
+            'nfeio_serviceinvoices',
+            'hook_aftercronjob_refresh_created',
+            "{$totalCreated} nota(s) com status Created para atualizar",
+            $createdInvoices
+        );
+
+        if ($totalCreated === 0) {
+            return;
+        }
+
+        foreach ($createdInvoices as $invoice) {
+            $apiResponse = $this->nf->fetchNf($invoice->nfe_id, $invoice->company_id);
+
+            if (is_array($apiResponse) && isset($apiResponse['error'])) {
+                logModuleCall(
+                    'nfeio_serviceinvoices',
+                    'hook_aftercronjob_refresh_created_error',
+                    ['nfe_id' => $invoice->nfe_id, 'company_id' => $invoice->company_id],
+                    $apiResponse['error']
+                );
+                continue;
+            }
+
+            if (!is_object($apiResponse) || empty($apiResponse->id) || empty($apiResponse->status)) {
+                logModuleCall(
+                    'nfeio_serviceinvoices',
+                    'hook_aftercronjob_refresh_created_invalid_response',
+                    ['nfe_id' => $invoice->nfe_id, 'company_id' => $invoice->company_id],
+                    $apiResponse
+                );
+                continue;
+            }
+
+            $flowStatus = isset($apiResponse->flowStatus) ? $apiResponse->flowStatus : null;
+            $this->nf->updateLocalNfeStatus($apiResponse->id, $apiResponse->status, $flowStatus);
+        }
     }
 }

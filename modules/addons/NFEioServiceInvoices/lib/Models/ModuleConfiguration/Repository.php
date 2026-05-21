@@ -39,7 +39,8 @@ class Repository extends \WHMCSExpert\mtLibs\models\Repository
         'descCustom',
         'footer',
         'iss_held',
-        'discount_items'
+        'discount_items',
+        'auto_refresh_created_status'
     );
 
     /**
@@ -68,7 +69,8 @@ class Repository extends \WHMCSExpert\mtLibs\models\Repository
         'descCustom',
         'footer',
         'iss_held',
-        'discount_items'
+        'discount_items',
+        'auto_refresh_created_status'
     );
 
     /**
@@ -311,6 +313,15 @@ class Repository extends \WHMCSExpert\mtLibs\models\Repository
             'required' => false,
             'disabled' => false,
             'description' => 'Informe o Código de Classificação Tributária para o IBS/CBS (classCode) padrão a ser utilizado na emissão das notas fiscais.',
+        ],
+        'auto_refresh_created_status' => [
+            'type' => 'checkbox',
+            'label' => 'Atualizar status de notas Criadas',
+            'name' => 'auto_refresh_created_status',
+            'id' => 'autoRefreshCreatedStatus_Field',
+            'required' => false,
+            'disabled' => false,
+            'description' => 'A cada execução do cron, consulta na API da NFE.io o status atualizado. Desativado por padrão.',
         ],
     );
 

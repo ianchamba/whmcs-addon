@@ -502,6 +502,7 @@ class Controller
         //$footer = isset($post['footer']) ? $post['footer'] : ' ';
         $iss_held = isset($post['iss_held']) ? $post['iss_held'] : 0;
         $discount_items = isset($post['discount_items']) ? $post['discount_items'] : '';
+        $auto_refresh_created_status = isset($post['auto_refresh_created_status']) ? $post['auto_refresh_created_status'] : '';
 
         // verifica cada campo e realiza a inserção das configurações no banco
         try {
@@ -531,6 +532,8 @@ class Controller
             $storage->set('iss_held', $iss_held);
             // discount_items
             $storage->set('discount_items', $discount_items);
+            // auto_refresh_created_status
+            $storage->set('auto_refresh_created_status', $auto_refresh_created_status);
 
             if ($rps_number) {
                 $storage->set('rps_number', $rps_number);
