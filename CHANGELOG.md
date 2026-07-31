@@ -1,3 +1,23 @@
+## v3.4.0
+Esta versão adiciona a verificação em segundo plano do status das notas fiscais, cobrindo os casos em que a notificação de webhook não chega ao WHMCS.
+
+### Novos Recursos
+#### Verificação de status das notas no `AfterCronJob`
+Até aqui, o status local de uma nota só era atualizado por push (`callback.php`) ou manualmente, pelo botão "Atualizar status" do admin. Quando o webhook falha — segredo divergente, indisponibilidade do WHMCS no momento do POST, entrega abandonada após os retries — a nota permanece indefinidamente em um status intermediário no banco local, mesmo já tendo sido emitida na prefeitura. O cliente continua vendo a nota como pendente e o problema só é percebido quando alguém abre o admin.
+
+O hook `AfterCronJob`, que até então apenas emitia as notas na fila (`status = Waiting`), passa a executar também uma rotina de reconciliação: consulta na API da NFE.io as notas que já possuem `nfe_id` mas ainda não chegaram a um status final (`Issued`, `Cancelled`, `Error`) e atualiza `status` e `flow_status` locais quando houver divergência. A rotina é uma reserva do webhook, não uma substituição — as notas atualizadas por callback nunca entram na seleção.
+
+Duas configurações novas no menu **Configurações**:
+
+| Campo | Padrão | Função |
+| --- | --- | --- |
+| Verificar Status das Notas | desabilitado | Liga a rotina. Desligada, o hook mantém exatamente o comportamento anterior. |
+| Limite de Notas por Verificação | 50 | Teto de consultas por execução do cron. |
+
+Notas com menos de 15 minutos são ignoradas, dando ao webhook a chance de chegar primeiro, e a seleção é ordenada pela verificação mais antiga — assim o limite por execução escoa a fila sem que nenhuma nota fique para trás. Notas em `Waiting` não entram na seleção, por serem responsabilidade da rotina de emissão do mesmo hook.
+
+Cada execução registra um `logModuleCall` (`hook_aftercronjob_status_check`) com o total pendente, atualizadas, inalteradas e falhas.
+
 ## v3.3.1
 Esta versão corrige a emissão de NFS-e, que passou a falhar com `415 Unsupported Media Type` a partir de 24/07/2026.
 
